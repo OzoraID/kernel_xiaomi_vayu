@@ -50,6 +50,24 @@
 #undef printk_deferred
 #define printk_deferred(x, ...)
 
+#ifdef CONFIG_FORCE_FAST_CHARGE
+#include <linux/fastchg.h>
+#endif
+
+#define smblib_err(chg, fmt, ...)		\
+	pr_err("%s: %s: " fmt, chg->name,	\
+		__func__, ##__VA_ARGS__)	\
+
+#define smblib_dbg(chg, reason, fmt, ...)			\
+	do {							\
+		if (*chg->debug_mask & (reason))		\
+			pr_info("%s: %s: " fmt, chg->name,	\
+				__func__, ##__VA_ARGS__);	\
+		else						\
+			pr_debug("%s: %s: " fmt, chg->name,	\
+				__func__, ##__VA_ARGS__);	\
+	} while (0)
+
 #define typec_rp_med_high(chg, typec_mode)			\
 	((typec_mode == POWER_SUPPLY_TYPEC_SOURCE_MEDIUM	\
 	|| typec_mode == POWER_SUPPLY_TYPEC_SOURCE_HIGH)	\
@@ -1660,6 +1678,13 @@ static int set_sdp_current(struct smb_charger *chg, int icl_ua)
 	int rc;
 	u8 icl_options;
 	const struct apsd_result *apsd_result = smblib_get_apsd_result(chg);
+
+#ifdef CONFIG_FORCE_FAST_CHARGE
+	if (force_fast_charge > 0 && icl_ua == USBIN_500MA)
+	{
+		icl_ua = USBIN_900MA;
+	}
+#endif
 
 	/* power source is SDP */
 	switch (icl_ua) {
