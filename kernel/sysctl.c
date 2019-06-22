@@ -132,11 +132,11 @@ static unsigned long one_ul = 1;
 static unsigned long long_max = LONG_MAX;
 static int one_hundred = 100;
 static int one_thousand = 1000;
-
-static int max_swappiness = 170;
-
 #ifdef CONFIG_SCHED_WALT
 static int two_million = 2000000;
+#endif
+#ifdef CONFIG_INCREASE_MAXIMUM_SWAPPINESS
+static int max_swappiness = 200;
 #endif
 #ifdef CONFIG_PRINTK
 static int ten_thousand = 10000;
@@ -1572,7 +1572,11 @@ static struct ctl_table vm_table[] = {
 		.mode		= 0644,
 		.proc_handler	= proc_dointvec_minmax,
 		.extra1		= &zero,
-		.extra2		= &max_swappiness,
+#ifdef CONFIG_INCREASE_MAXIMUM_SWAPPINESS
+		.extra2         = &max_swappiness,
+#else
+		.extra2		= &one_hundred,
+#endif
 	},
 	{
 		.procname       = "want_old_faultaround_pte",
