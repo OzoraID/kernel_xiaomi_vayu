@@ -31,6 +31,8 @@
 #include <linux/msm_drm_notify.h>
 #endif
 
+#include <linux/moduleparam.h>
+
 #define CREATE_TRACE_POINTS
 #include <trace/events/thermal.h>
 
@@ -72,6 +74,12 @@ static char boost_buf[128];
  * Functions to help in the life cycle of thermal governors within
  * the thermal core and by the thermal governor code.
  */
+
+#ifdef CONFIG_THERMAL_SUSPEND_RESUME
+static int prev_sconfig = 10;
+static int suspend_sconfig = -1;
+module_param(suspend_sconfig, int, 0644);
+#endif
 
 static struct thermal_governor *__find_governor(const char *name)
 {
@@ -1658,6 +1666,23 @@ thermal_sconfig_store(struct device *dev,
 static DEVICE_ATTR(sconfig, 0664,
 		   thermal_sconfig_show, thermal_sconfig_store);
 
+#ifdef CONFIG_THERMAL_SUSPEND_RESUME
+void thermal_sconfig_suspend(void){
+	prev_sconfig = atomic_read(&switch_mode);
+	if (suspend_sconfig < -1 || suspend_sconfig > THERMAL_MAX_ACTIVE){
+		pr_err("NGK::THERMAL::SUSPEND::suspend_sconfig out of range %d", suspend_sconfig);
+		suspend_sconfig = -1;
+	}
+	atomic_set(&switch_mode, suspend_sconfig);
+	pr_err("NGK::THERMAL::SUSPEND::suspend_sconfig %d", suspend_sconfig);
+}
+
+void thermal_sconfig_resume(void){
+	atomic_set(&switch_mode, prev_sconfig);
+	pr_err("NGK::THERMAL::RESUME::prev_sconfig %d", prev_sconfig);
+}
+#endif
+
 static ssize_t
 thermal_boost_show(struct device *dev,
 				      struct device_attribute *attr, char *buf)
@@ -1761,6 +1786,58 @@ static void destroy_thermal_message_node(void)
 	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_sconfig.attr);
 	device_unregister(&thermal_message_dev);
 }
+
+#ifdef CONFIG_DRM
+static int screen_state_for_thermal_callback(struct notifier_block *nb, unsigned long val, void *data)
+{
+	struct msm_drm_notifier *evdata = data;
+	unsigned int blank;
+
+	if (val != MSM_DRM_EVENT_BLANK || !evdata || !evdata->data)
+		return 0;
+
+	blank = *(int *)(evdata->data);
+	switch (blank) {
+	case MSM_DRM_BLANK_POWERDOWN:
+		sm.screen_state = 0;
+		pr_warn("%s: MSM_DRM_BLANK_POWERDOWN\n", __func__);
+#ifdef CONFIG_THERMAL_SUSPEND_RESUME
+		thermal_sconfig_suspend();
+#endif
+		break;
+	case MSM_DRM_BLANK_UNBLANK:
+		sm.screen_state = 1;
+		pr_warn("%s: MSM_DRM_BLANK_UNBLANK\n", __func__);
+#ifdef CONFIG_THERMAL_SUSPEND_RESUME
+		thermal_sconfig_resume();
+#endif
+		break;
+	default:
+		break;
+	}
+
+	sysfs_notify(&thermal_message_dev.kobj, NULL, "screen_state");
+
+	return NOTIFY_OK;
+}
+#endif
+
+static int of_parse_thermal_message(void)
+{
+	struct device_node *np;
+
+	np = of_find_node_by_name(NULL, "thermal-message");
+	if (!np)
+		return -EINVAL;
+
+	if (of_property_read_string(np, "board-sensor", &board_sensor))
+		return -EINVAL;
+
+	pr_info("%s board sensor: %s\n", board_sensor);
+
+	return 0;
+}
+
 
 static int __init thermal_init(void)
 {
