@@ -384,14 +384,6 @@ struct ufs_hba_variant_ops {
 };
 
 /**
-* struct ufs_hba_pm_qos_variant_ops - variant specific PM QoS callbacks
-*/
-struct ufs_hba_pm_qos_variant_ops {
-	void		(*req_start)(struct ufs_hba *, struct request *);
-	void		(*req_end)(struct ufs_hba *, struct request *, bool);
-};
-
-/**
  * struct ufs_hba_variant - variant specific parameters
  * @name: variant name
  */
@@ -399,7 +391,6 @@ struct ufs_hba_variant {
 	struct device				*dev;
 	const char				*name;
 	struct ufs_hba_variant_ops		*vops;
-	struct ufs_hba_pm_qos_variant_ops	*pm_qos_vops;
 };
 
 struct keyslot_mgmt_ll_ops;
