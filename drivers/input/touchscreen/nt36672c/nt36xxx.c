@@ -32,7 +32,14 @@
 #include <linux/init.h>
 
 #include <linux/notifier.h>
+#ifdef CONFIG_DRM
 #include <linux/msm_drm_notify.h>
+#endif
+
+#include <linux/fb.h>
+#if defined(CONFIG_HAS_EARLYSUSPEND)
+#include <linux/earlysuspend.h>
+#endif
 
 #include "nt36xxx.h"
 #if NVT_TOUCH_ESD_PROTECT
@@ -2145,7 +2152,19 @@ static int32_t nvt_ts_probe(struct platform_device *pdev)
 	nvt_irq_enable(true);
 	return 0;
 
-err_destroy_wq:
+#ifdef CONFIG_DRM
+	if(msm_drm_unregister_client(&ts->drm_notif))
+		NVT_ERR("Error occurred while unregistering drm_notifier.\n");
+err_register_drm_notif_failed:
+#else
+	if (fb_unregister_client(&ts->fb_notif))
+		NVT_ERR("Error occurred while unregistering fb_notifier.\n");
+err_register_fb_notif_failed:
+#endif
+#if defined(CONFIG_HAS_EARLYSUSPEND)
+	unregister_early_suspend(&ts->early_suspend);
+err_register_early_suspend_failed:
+#endif
 	destroy_workqueue(ts->event_wq);
 err_alloc_failed:
 #if NVT_TOUCH_EXT_PROC
@@ -2216,6 +2235,7 @@ static int32_t nvt_ts_remove(struct platform_device *pdev)
 {
 	NVT_LOG("Removing driver...\n");
 
+#ifdef CONFIG_DRM
 	if (msm_drm_unregister_client(&ts->drm_notif))
 		NVT_ERR("Error occurred while unregistering drm_notifier.\n");
 
@@ -2275,6 +2295,7 @@ static void nvt_ts_shutdown(struct platform_device *pdev)
 
 	nvt_irq_enable(false);
 
+#ifdef CONFIG_DRM
 	if (msm_drm_unregister_client(&ts->drm_notif))
 		NVT_ERR("Error occurred while unregistering drm_notifier.\n");
 
