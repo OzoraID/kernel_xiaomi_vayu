@@ -744,6 +744,53 @@ err:
 	return ret;
 }
 
+static u32 nft_chain_hash(const void *data, u32 len, u32 seed)
+{
+	const char *name = data;
+
+	return jhash(name, strlen(name), seed);
+}
+
+static u32 nft_chain_hash_obj(const void *data, u32 len, u32 seed)
+{
+	const struct nft_chain *chain = data;
+
+	return nft_chain_hash(chain->name, 0, seed);
+}
+
+static int nft_chain_hash_cmp(struct rhashtable_compare_arg *arg,
+			      const void *ptr)
+{
+	const struct nft_chain *chain = ptr;
+	const char *name = arg->key;
+
+	return strcmp(chain->name, name);
+}
+
+static bool nft_supported_family(u8 family)
+{
+	return false
+#ifdef CONFIG_NF_TABLES_INET
+		|| family == NFPROTO_INET
+#endif
+#ifdef CONFIG_NF_TABLES_IPV4
+		|| family == NFPROTO_IPV4
+#endif
+#ifdef CONFIG_NF_TABLES_ARP
+		|| family == NFPROTO_ARP
+#endif
+#ifdef CONFIG_NF_TABLES_NETDEV
+		|| family == NFPROTO_NETDEV
+#endif
+#if IS_ENABLED(CONFIG_NF_TABLES_BRIDGE)
+		|| family == NFPROTO_BRIDGE
+#endif
+#ifdef CONFIG_NF_TABLES_IPV6
+		|| family == NFPROTO_IPV6
+#endif
+		;
+}
+
 static int nf_tables_newtable(struct net *net, struct sock *nlsk,
 			      struct sk_buff *skb, const struct nlmsghdr *nlh,
 			      const struct nlattr * const nla[],
@@ -759,12 +806,13 @@ static int nf_tables_newtable(struct net *net, struct sock *nlsk,
 	struct nft_ctx ctx;
 	int err;
 
-	afi = nf_tables_afinfo_lookup(net, family, true);
-	if (IS_ERR(afi))
-		return PTR_ERR(afi);
+	if (!nft_supported_family(family))
+		return -EOPNOTSUPP;
 
-	name = nla[NFTA_TABLE_NAME];
-	table = nf_tables_table_lookup(afi, name, genmask);
+	lockdep_assert_held(&nft_net->commit_mutex);
+	attr = nla[NFTA_TABLE_NAME];
+	table = nft_table_lookup(net, attr, family, genmask);
+
 	if (IS_ERR(table)) {
 		if (PTR_ERR(table) != -ENOENT)
 			return PTR_ERR(table);
