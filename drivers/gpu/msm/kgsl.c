@@ -5286,16 +5286,29 @@ static int __init kgsl_core_init(void)
 	kgsl_driver.mem_workqueue = alloc_workqueue("kgsl-mementry",
 		WQ_HIGHPRI | WQ_MEM_RECLAIM, 0);
 
-	if (IS_ERR_VALUE(kgsl_run_one_worker_perf(&kgsl_driver.worker,
-			&kgsl_driver.worker_thread,
-			"kgsl_worker_thread")) ||
-		IS_ERR_VALUE(kgsl_run_one_worker(&kgsl_driver.low_prio_worker,
-			&kgsl_driver.low_prio_worker_thread,
-			"kgsl_low_prio_worker_thread")))
+	INIT_WORK(&kgsl_driver.mem_work, _flush_mem_workqueue);
+
+	kthread_init_worker(&kgsl_driver.worker);
+
+	kgsl_driver.worker_thread = kthread_run_perf_critical(cpu_perf_mask,
+		kthread_worker_fn, &kgsl_driver.worker, "kgsl_worker_thread");
+
+	if (IS_ERR(kgsl_driver.worker_thread)) {
+		pr_err("kgsl: unable to start kgsl_worker_thread\n");
 		goto err;
 
+	kthread_init_worker(&kgsl_driver.low_prio_worker);
+
+	kgsl_driver.low_prio_worker_thread = kthread_run_perf_critical(cpu_lp_mask,
+		kthread_worker_fn, &kgsl_driver.low_prio_worker, "kgsl_low_prio_worker_thread");
+
+	if (IS_ERR(kgsl_driver.low_prio_worker_thread)) {
+		pr_err("kgsl: unable to start kgsl_low_prio_worker_thread\n");
+		goto err;
+	}
+
+	sched_setscheduler(kgsl_driver.worker_thread, SCHED_FIFO, &param);
 	/* kgsl_driver.low_prio_worker_thread should not be SCHED_FIFO */
-	sched_setscheduler(kgsl_driver.worker_thread, SCHED_RR, &param);
 
 	kgsl_events_init();
 

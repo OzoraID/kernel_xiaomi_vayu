@@ -890,7 +890,7 @@ TRACE_EVENT(kgsl_register_event,
 			__entry->prio = prio;
 		),
 		TP_printk(
-			"ctx=%u ts=%u cb=%pF prio=%s",
+			"ctx=%u ts=%u cb=%pS prio=%s",
 			__entry->id, __entry->timestamp, __entry->func,
 			prio_to_string(__entry->prio))
 );
@@ -917,7 +917,7 @@ TRACE_EVENT(kgsl_fire_event,
 			__entry->prio = prio;
 		),
 		TP_printk(
-			"ctx=%u ts=%u type=%s age=%u cb=%pF prio=%s",
+			"ctx=%u ts=%u type=%s age=%u cb=%pS prio=%s",
 			__entry->id, __entry->ts,
 			__print_symbolic(__entry->type, KGSL_EVENT_TYPES),
 			__entry->age, __entry->func,
