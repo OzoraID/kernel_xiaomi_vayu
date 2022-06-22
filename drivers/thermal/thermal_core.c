@@ -25,6 +25,7 @@
 #include <net/netlink.h>
 #include <net/genetlink.h>
 #include <linux/suspend.h>
+#ifdef CONFIG_MACH_XIAOMI_SM8150
 #include <linux/cpu_cooling.h>
 #include <linux/kobject.h>
 #include <../base/base.h>
@@ -32,8 +33,7 @@
 #ifdef CONFIG_DRM
 #include <linux/msm_drm_notify.h>
 #endif
-
-#include <linux/moduleparam.h>
+#endif
 
 #define CREATE_TRACE_POINTS
 #include <trace/events/thermal.h>
@@ -47,7 +47,9 @@ MODULE_LICENSE("GPL v2");
 
 #define THERMAL_MAX_ACTIVE	16
 
+#ifdef CONFIG_MACH_XIAOMI_SM8150
 #define CPU_LIMITS_PARAM_NUM	2
+#endif
 
 static DEFINE_IDA(thermal_tz_ida);
 static DEFINE_IDA(thermal_cdev_ida);
@@ -69,6 +71,7 @@ static struct thermal_governor *def_governor;
 
 static struct workqueue_struct *thermal_passive_wq;
 
+#ifdef CONFIG_MACH_XIAOMI_SM8150
 #ifdef CONFIG_DRM
 struct screen_monitor {
 	struct notifier_block thermal_notifier;
@@ -81,8 +84,7 @@ struct screen_monitor sm;
 static atomic_t switch_mode = ATOMIC_INIT(-1);
 static atomic_t temp_state = ATOMIC_INIT(0);
 static char boost_buf[128];
-const char *board_sensor;
-static char board_sensor_temp[128];
+#endif
 
 /*
  * Governor section: set of functions to handle thermal governors
@@ -989,7 +991,9 @@ static struct class thermal_class = {
 	.dev_release = thermal_release,
 };
 
+#ifdef CONFIG_MACH_XIAOMI_SM8150
 static struct device thermal_message_dev;
+#endif
 
 static inline
 void print_bind_err_msg(struct thermal_zone_device *tz,
@@ -1725,6 +1729,7 @@ static struct notifier_block thermal_pm_nb = {
 	.notifier_call = thermal_pm_notify,
 };
 
+#ifdef CONFIG_MACH_XIAOMI_SM8150
 #ifdef CONFIG_DRM
 static ssize_t
 thermal_screen_state_show(struct device *dev,
@@ -1791,7 +1796,7 @@ thermal_boost_store(struct device *dev,
 				      struct device_attribute *attr, const char *buf, size_t len)
 {
 	int ret;
-	ret = snprintf(boost_buf, sizeof(boost_buf), buf);
+	ret = snprintf(boost_buf, PAGE_SIZE, buf);
 	return len;
 }
 
@@ -1848,38 +1853,6 @@ cpu_limits_store(struct device *dev,
 static DEVICE_ATTR(cpu_limits, 0664,
 		   cpu_limits_show, cpu_limits_store);
 
-static ssize_t
-thermal_board_sensor_show(struct device *dev,
-		struct device_attribute *attr, char *buf)
-{
-	if (!board_sensor)
-		board_sensor = "invalid";
-
-	return snprintf(buf, PAGE_SIZE, "%s", board_sensor);
-}
-
-static DEVICE_ATTR(board_sensor, 0664,
-		thermal_board_sensor_show, NULL);
-
-static ssize_t
-thermal_board_sensor_temp_show(struct device *dev,
-				struct device_attribute *attr, char *buf)
-{
-       return snprintf(buf, PAGE_SIZE, board_sensor_temp);
-}
-
-static ssize_t
-thermal_board_sensor_temp_store(struct device *dev,
-				struct device_attribute *attr, const char *buf, size_t len)
-{
-       snprintf(board_sensor_temp, sizeof(board_sensor_temp), buf);
-
-       return len;
-}
-
-static DEVICE_ATTR(board_sensor_temp, 0664,
-		thermal_board_sensor_temp_show, thermal_board_sensor_temp_store);
-
 static int create_thermal_message_node(void)
 {
 	int ret = 0;
@@ -1909,13 +1882,6 @@ static int create_thermal_message_node(void)
 		ret = sysfs_create_file(&thermal_message_dev.kobj, &dev_attr_cpu_limits.attr);
 		if (ret < 0)
 			pr_warn("Thermal: create cpu limits node failed\n");
-				ret = sysfs_create_file(&thermal_message_dev.kobj, &dev_attr_board_sensor.attr);
-		if (ret < 0)
-			pr_warn("Thermal: create board sensor node failed\n");
-
-		ret = sysfs_create_file(&thermal_message_dev.kobj, &dev_attr_board_sensor_temp.attr);
-		if (ret < 0)
-			pr_warn("Thermal: create board sensor temp node failed\n");
 	}
 
 	return ret;
@@ -1927,8 +1893,6 @@ static void destroy_thermal_message_node(void)
 	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_temp_state.attr);
 	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_boost.attr);
 	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_sconfig.attr);
-	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_board_sensor_temp.attr);
-	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_board_sensor.attr);
 #ifdef CONFIG_DRM
 	sysfs_remove_file(&thermal_message_dev.kobj, &dev_attr_screen_state.attr);
 #endif
@@ -1967,22 +1931,7 @@ static int screen_state_for_thermal_callback(struct notifier_block *nb, unsigned
 	return NOTIFY_OK;
 }
 #endif
-
-static int of_parse_thermal_message(void)
-{
-	struct device_node *np;
-
-	np = of_find_node_by_name(NULL, "thermal-message");
-	if (!np)
-		return -EINVAL;
-
-	if (of_property_read_string(np, "board-sensor", &board_sensor))
-		return -EINVAL;
-
-	pr_info("%s board sensor: %s\n", board_sensor);
-
-	return 0;
-}
+#endif
 
 static int __init thermal_init(void)
 {
@@ -2014,13 +1963,10 @@ static int __init thermal_init(void)
 		pr_warn("Thermal: Can not register suspend notifier, return %d\n",
 			result);
 
+#ifdef CONFIG_MACH_XIAOMI_SM8150
 	result = create_thermal_message_node();
 	if (result)
 		pr_warn("Thermal: create thermal message node failed, return %d\n",
-			result);
-	result = of_parse_thermal_message();
-	if (result)
-		pr_warn("Thermal: Can not parse thermal message node, return %d\n",
 			result);
 
 #ifdef CONFIG_DRM
@@ -2028,6 +1974,7 @@ static int __init thermal_init(void)
 	if (msm_drm_register_client(&sm.thermal_notifier) < 0) {
 		pr_warn("Thermal: register screen state callback failed\n");
 	}
+#endif
 #endif
 
 	return 0;
@@ -2049,8 +1996,11 @@ error:
 
 static void thermal_exit(void)
 {
+#ifdef CONFIG_MACH_XIAOMI_SM8150
 #ifdef CONFIG_DRM
 	msm_drm_unregister_client(&sm.thermal_notifier);
+#endif
+	destroy_thermal_message_node();
 #endif
 	unregister_pm_notifier(&thermal_pm_nb);
 	of_thermal_destroy_zones();
