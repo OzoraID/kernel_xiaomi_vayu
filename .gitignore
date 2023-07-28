@@ -134,3 +134,13 @@ Android.bp
 
 # Builder data for LINUX_COMPILE_BY/HOST replacement on sandboxed ABS
 .builderdata
+
+# ignore compile script
+compile.sh
+
+# ignore name kernel
+localversion
+
+# ignore out folder
+out
+
