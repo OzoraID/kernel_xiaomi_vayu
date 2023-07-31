@@ -68,24 +68,10 @@ static void thermal_throttle_worker(struct work_struct *work)
 		goto reschedule;
 	}
 
-	temp_cpus_avg = temp_total / NR_CPUS;
-
-	/* Now let's also get battery temperature */
-	thermal_zone_get_temp(thermal_zone_get_zone_by_name("battery"), &temp_batt);
-
-	/* HQ autism coming up */
-	if (temp_batt <= 30000)
-		temp_avg = (temp_cpus_avg * 2 + temp_batt * 3) / 5;
-	else if (temp_batt > 30000 && temp_batt <= 38000)
-		temp_avg = (temp_cpus_avg * 3 + temp_batt * 2) / 5;
-	else if (temp_batt > 38000 && temp_batt <= 43000)
-		temp_avg = (temp_cpus_avg * 4 + temp_batt) / 5;
-	else if (temp_batt > 43000)
-		temp_avg = (temp_cpus_avg * 5 + temp_batt) / 6;
-
-	/* Emergency case */
-	if (temp_cpus_avg > 86000)
-		temp_avg = (temp_cpus_avg * 6 + temp_batt) / 7;
+	temp_deg = result.physical;
+#ifdef TEMP_DEBUG
+	printk("thermal reading is: %lld\n", temp_deg);
+#endif
 
 	old_zone = t->curr_zone;
 	new_zone = NULL;
