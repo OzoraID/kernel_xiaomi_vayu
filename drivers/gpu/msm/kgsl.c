@@ -5257,10 +5257,6 @@ static int __init kgsl_core_init(void)
 	kgsl_driver.mem_workqueue = alloc_workqueue("kgsl-mementry",
 		WQ_UNBOUND | WQ_MEM_RECLAIM, 0);
 
-	kthread_init_worker(&kgsl_driver.worker);
-
-	kgsl_driver.worker_thread = kthread_run_perf_critical(cpu_perf_mask, kthread_worker_fn, &kgsl_driver.worker,"kgsl_worker_thread");
-
 	if (IS_ERR_VALUE(kgsl_run_one_worker(&kgsl_driver.worker,
 			&kgsl_driver.worker_thread,
 			"kgsl_worker_thread")) ||
