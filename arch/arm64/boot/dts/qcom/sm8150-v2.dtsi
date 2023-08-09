@@ -1470,7 +1470,7 @@
 		zone@6 {
 			reg = <6>;
 			qcom,silver-khz = <1708800>;
-			qcom,gold-khz = <825600>;
+			qcom,gold-khz = <1401600>;
 			qcom,prime-khz = <1804800>;
 			qcom,trip-deg = <74000>;
 		};
