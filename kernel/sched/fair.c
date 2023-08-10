@@ -7708,7 +7708,7 @@ static inline int find_best_target(struct task_struct *p, int *backup_cpu,
 				 * Skip searching for active CPU for tasks have
 				 * high priority & prefer_high_cap.
 				 */
-				if (prefer_high_cap && p->prio <= DEFAULT_PRIO)
+			//	if (prefer_high_cap && p->prio <= DEFAULT_PRIO)
 					continue;
 
 				/*
@@ -8935,7 +8935,6 @@ static bool yield_to_task_fair(struct rq *rq, struct task_struct *p, bool preemp
 	return true;
 }
 
-#ifdef CONFIG_SMP
 /**************************************************
  * Fair scheduling class load-balancing methods.
  *
