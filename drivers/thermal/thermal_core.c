@@ -1818,7 +1818,7 @@ error:
 static void thermal_exit(void)
 {
 #ifdef CONFIG_DRM
-	msm_drm_unregister_client(&sm.thermal_notifier);
+//	msm_drm_unregister_client(&sm.thermal_notifier);
 #endif
 	unregister_pm_notifier(&thermal_pm_nb);
 	of_thermal_destroy_zones();
