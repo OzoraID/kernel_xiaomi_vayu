@@ -5325,3 +5325,4 @@ module_exit(kgsl_core_exit);
 
 MODULE_DESCRIPTION("MSM GPU driver");
 MODULE_LICENSE("GPL v2");
+}
