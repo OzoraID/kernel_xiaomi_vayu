@@ -144,3 +144,5 @@ localversion
 # ignore out folder
 out
 
+# ignore Repo 
+KernelSU 
