@@ -707,7 +707,6 @@ int schedtune_prefer_high_cap(struct task_struct *p)
 	/* Get prefer_high_cap value */
 	rcu_read_lock();
 	st = task_schedtune(p);
-	prefer_high_cap = st->prefer_high_cap;
 	rcu_read_unlock();
 
 	return prefer_high_cap;
@@ -718,15 +717,12 @@ static u64 prefer_high_cap_read(struct cgroup_subsys_state *css,
 {
 	struct schedtune *st = css_st(css);
 
-	return st->prefer_high_cap;
 }
 
 static int prefer_high_cap_write(struct cgroup_subsys_state *css,
 				 struct cftype *cft, u64 prefer_high_cap)
 {
 	struct schedtune *st = css_st(css);
-	st->prefer_high_cap = !!prefer_high_cap;
-	
 	return 0;
 }
 
