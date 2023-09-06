@@ -1806,14 +1806,12 @@ static int screen_state_for_thermal_callback(struct notifier_block *nb, unsigned
 	blank = *(int *)(evdata->data);
 	switch (blank) {
 	case MSM_DRM_BLANK_POWERDOWN:
-		sm.screen_state = 0;
 		pr_warn("%s: MSM_DRM_BLANK_POWERDOWN\n", __func__);
 #ifdef CONFIG_THERMAL_SUSPEND_RESUME
 		thermal_sconfig_suspend();
 #endif
 		break;
 	case MSM_DRM_BLANK_UNBLANK:
-		sm.screen_state = 1;
 		pr_warn("%s: MSM_DRM_BLANK_UNBLANK\n", __func__);
 #ifdef CONFIG_THERMAL_SUSPEND_RESUME
 		thermal_sconfig_resume();
@@ -1836,11 +1834,6 @@ static int of_parse_thermal_message(void)
 	np = of_find_node_by_name(NULL, "thermal-message");
 	if (!np)
 		return -EINVAL;
-
-	if (of_property_read_string(np, "board-sensor", &board_sensor))
-		return -EINVAL;
-
-	pr_info("%s board sensor: %s\n", board_sensor);
 
 	return 0;
 }
