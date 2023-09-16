@@ -617,7 +617,7 @@ EXPORT_SYMBOL(get_random_bytes_arch);
 enum {
 	POOL_BITS = BLAKE2S_HASH_SIZE * 128,
 	POOL_READY_BITS = POOL_BITS, /* When crng_init->CRNG_READY */
-	POOL_EARLY_BITS = POOL_READY_BITS / 8 /* When crng_init->CRNG_EARLY */
+	POOL_EARLY_BITS = POOL_READY_BITS / 2 /* When crng_init->CRNG_EARLY */
 };
 
 static struct {
