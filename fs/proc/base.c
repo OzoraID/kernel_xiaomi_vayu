@@ -1070,8 +1070,6 @@ static int __set_oom_adj(struct file *file, int oom_adj, bool legacy)
 		task->signal->oom_score_adj_min = (short)oom_adj;
 	trace_oom_score_adj_update(task);
 
-#endif
-
 	if (oom_adj >= 100)
 		strncpy(task_comm, task->comm, TASK_COMM_LEN);
 
