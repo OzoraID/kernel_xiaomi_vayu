@@ -190,16 +190,8 @@ static void vma_stop(struct proc_maps_private *priv)
 	up_read(&mm->mmap_sem);
 	mmput(mm);
 
-
-	if (set_pid_boost == 1)
-		sched_migrate_to_cpumask_end(to_cpumask(&priv->old_cpus_allowed),
-						cpu_prime_mask);
-	else if (set_pid_boost == 2)
-		sched_migrate_to_cpumask_end(to_cpumask(&priv->old_cpus_allowed),
-						cpu_lp_mask);
-	else
-		sched_migrate_to_cpumask_end(to_cpumask(&priv->old_cpus_allowed),
-						cpu_perf_mask);
+	sched_migrate_to_cpumask_end(to_cpumask(&priv->old_cpus_allowed),
+				     cpu_lp_mask);
 }
 
 static struct vm_area_struct *
@@ -236,19 +228,8 @@ static void *m_start(struct seq_file *m, loff_t *ppos)
 	if (!mm || !mmget_not_zero(mm))
 		return NULL;
 
-	if (set_pid_boost == 1)
-		sched_migrate_to_cpumask_start(to_cpumask(&priv->old_cpus_allowed),
-						cpu_prime_mask);
-	else if (set_pid_boost == 2)
-		sched_migrate_to_cpumask_start(to_cpumask(&priv->old_cpus_allowed),
-						cpu_lp_mask);
-	else
-		sched_migrate_to_cpumask_start(to_cpumask(&priv->old_cpus_allowed),
-						cpu_perf_mask);
-
-	cpu_input_boost_kick_max(100);
-	devfreq_boost_kick_max(DEVFREQ_CPU_LLCC_DDR_BW, 100);
-	devfreq_boost_kick_max(DEVFREQ_CPU_CPU_LLCC_BW, 100);
+	sched_migrate_to_cpumask_start(to_cpumask(&priv->old_cpus_allowed),
+				       cpu_lp_mask);
 
 	down_read(&mm->mmap_sem);
 	hold_task_mempolicy(priv);
