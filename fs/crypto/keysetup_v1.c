@@ -334,18 +334,6 @@ static int setup_v1_file_key_derived(struct fscrypt_info *ci,
 							 &ino_hash_key.k);
 		}
 
-#if IS_ENABLED(CONFIG_ENABLE_LEGACY_PFK)
-		derived_key = kmalloc(ci->ci_mode->keysize, GFP_KERNEL);
-		if (!derived_key)
-			return -ENOMEM;
-
-		err = derive_key_aes(raw_master_key, ci->ci_nonce,
-				     derived_key, ci->ci_mode->keysize);
-		if (err)
-			goto out;
-
-		memcpy(key_new.bytes, derived_key, ci->ci_mode->keysize);
-#else
 		memcpy(key_new.bytes, raw_master_key, ci->ci_mode->keysize);
 
 		for (i = 0; i < ARRAY_SIZE(key_new.words); i++)
