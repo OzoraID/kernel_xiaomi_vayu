@@ -523,7 +523,7 @@ static struct cpuidle_governor teo_governor = {
 	.name =		"teo",
 	.rating =	50,
 	.enable =	teo_enable_device,
-//	.select =	teo_select,
+	.select =	teo_select,
 	.reflect =	teo_reflect,
 };
 
