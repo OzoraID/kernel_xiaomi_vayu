@@ -2130,7 +2130,7 @@ static int32_t nvt_ts_probe(struct platform_device *pdev)
 	ret = msm_drm_register_client(&ts->drm_notif);
 	if(ret) {
 		NVT_ERR("register drm_notifier failed. ret=%d\n", ret);
-		goto err_destroy_wq;
+		goto err_register_drm_notif_failed;
 	}
 
 #ifdef CONFIG_TOUCHSCREEN_NVT_DEBUG_FS
@@ -2238,6 +2238,10 @@ static int32_t nvt_ts_remove(struct platform_device *pdev)
 #ifdef CONFIG_DRM
 	if (msm_drm_unregister_client(&ts->drm_notif))
 		NVT_ERR("Error occurred while unregistering drm_notifier.\n");
+#else
+	if (fb_unregister_client(&ts->fb_notif))
+		NVT_ERR("Error occurred while unregistering fb_notifier.\n");
+#endif
 
 #if NVT_TOUCH_EXT_PROC
 	nvt_extra_proc_deinit();
@@ -2298,6 +2302,10 @@ static void nvt_ts_shutdown(struct platform_device *pdev)
 #ifdef CONFIG_DRM
 	if (msm_drm_unregister_client(&ts->drm_notif))
 		NVT_ERR("Error occurred while unregistering drm_notifier.\n");
+#else
+	if (fb_unregister_client(&ts->fb_notif))
+		NVT_ERR("Error occurred while unregistering fb_notifier.\n");
+#endif
 
 #if NVT_TOUCH_EXT_PROC
 	nvt_extra_proc_deinit();
