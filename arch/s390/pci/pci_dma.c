@@ -12,6 +12,7 @@
 #include <linux/dma-mapping.h>
 #include <linux/vmalloc.h>
 #include <linux/pci.h>
+#include <linux/overflow.h>
 #include <asm/pci_dma.h>
 
 #define S390_MAPPING_ERROR		(~(dma_addr_t) 0x0)
