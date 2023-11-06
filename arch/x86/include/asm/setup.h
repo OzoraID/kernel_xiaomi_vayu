@@ -123,9 +123,9 @@ asmlinkage void __init x86_64_start_reservations(char *real_mode_data);
 
 .macro __RESERVE_BRK name, size
 	.pushsection .bss..brk, "aw"
-SYM_DATA_START(__brk_\name)
+GLOBAL(__brk_\name)
 	.skip \size
-SYM_DATA_END(__brk_\name)
+END(__brk_\name)
 	.popsection
 .endm
 
