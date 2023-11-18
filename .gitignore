@@ -144,3 +144,6 @@ out/
 
 # ignore repo
 KernelSU/
+
+# ignore AK3
+AK3
