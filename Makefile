@@ -765,6 +765,7 @@ else
 KBUILD_LDFLAGS += $(OPT_FLAGS)
 endif
 endif
+endif
 
 # Tell gcc to never replace conditional load with a non-conditional one
 KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
