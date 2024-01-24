@@ -764,12 +764,6 @@ endif
 OPT_FLAGS	+= $(POLLY_FLAGS)
 KBUILD_LDFLAGS	+= $(POLLY_FLAGS)
 endif
-ifdef CONFIG_INLINE_OPTIMIZATION
-KBUILD_CFLAGS	+= -mllvm -inline-threshold=2000
-KBUILD_CFLAGS	+= -mllvm -inlinehint-threshold=3000
-KBUILD_CFLAGS   += -mllvm -unroll-threshold=1200
-KBUILD_LDFLAGS  += --plugin-opt=-import-instr-limit=40
-endif
 KBUILD_CFLAGS	+= $(OPT_FLAGS)
 KBUILD_AFLAGS   += $(OPT_FLAGS)
 ifdef CONFIG_LTO_CLANG
