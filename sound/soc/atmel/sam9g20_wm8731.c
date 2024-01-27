@@ -179,21 +179,21 @@ static int at91sam9g20ek_audio_probe(struct platform_device *pdev)
 	 */
 	mclk = clk_get(NULL, "pck0");
 	if (IS_ERR(mclk)) {
-		dev_err(&pdev->dev, "Failed to get MCLK\n");
+		printk(KERN_ERR "ASoC: Failed to get MCLK\n");
 		ret = PTR_ERR(mclk);
 		goto err;
 	}
 
 	pllb = clk_get(NULL, "pllb");
 	if (IS_ERR(pllb)) {
-		dev_err(&pdev->dev, "Failed to get PLLB\n");
+		printk(KERN_ERR "ASoC: Failed to get PLLB\n");
 		ret = PTR_ERR(pllb);
 		goto err_mclk;
 	}
 	ret = clk_set_parent(mclk, pllb);
 	clk_put(pllb);
 	if (ret != 0) {
-		dev_err(&pdev->dev, "Failed to set MCLK parent\n");
+		printk(KERN_ERR "ASoC: Failed to set MCLK parent\n");
 		goto err_mclk;
 	}
 
