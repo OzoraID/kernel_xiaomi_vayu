@@ -429,14 +429,6 @@ static const struct dmi_system_id __initconst i8042_dmi_nomux_table[] = {
 		},
 	},
 	{
-		/* Acer TravelMate P459-G2-M */
-		.matches = {
-			DMI_MATCH(DMI_SYS_VENDOR, "Acer"),
-			DMI_MATCH(DMI_PRODUCT_NAME, "TravelMate P459-G2-M"),
-		},
-		.driver_data = (void *)(SERIO_QUIRK_NOMUX)
-	},
-	{
 		/* Amoi M636/A737 */
 		.matches = {
 			DMI_MATCH(DMI_SYS_VENDOR, "Amoi Electronics CO.,LTD."),
