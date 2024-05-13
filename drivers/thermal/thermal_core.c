@@ -871,7 +871,6 @@ int thermal_zone_bind_cooling_device(struct thermal_zone_device *tz,
 	dev->lower_attr.store = thermal_cooling_device_lower_limit_store;
 	result = device_create_file(&tz->device, &dev->lower_attr);
 	if (result)
-
 		goto remove_upper_file;
 
 	snprintf(dev->weight_attr_name, sizeof(dev->weight_attr_name),
