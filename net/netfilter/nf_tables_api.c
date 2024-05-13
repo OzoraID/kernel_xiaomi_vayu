@@ -811,9 +811,9 @@ static int nf_tables_newtable(struct net *net, struct sock *nlsk,
 	if (!nft_supported_family(family))
 		return -EOPNOTSUPP;
 
-	lockdep_assert_held(&nft_net->commit_mutex);
-	attr = nla[NFTA_TABLE_NAME];
-	table = nft_table_lookup(net, attr, family, genmask);
+	afi = nf_tables_afinfo_lookup(net, family, true);
+	if (IS_ERR(afi))
+		return PTR_ERR(afi);
 
 	if (IS_ERR(table)) {
 		if (PTR_ERR(table) != -ENOENT)

@@ -878,7 +878,7 @@ static int dlpar_memory_add_by_count(u32 lmbs_to_add, struct property *prop)
 
 			pr_debug("Memory at %llx (drc index %x) was hot-added\n",
 				 lmbs[i].base_addr, lmbs[i].drc_index);
-                        lmbs[i].reserved = 0;
+			lmbs[i].reserved = 0;
 		}
 		rc = 0;
 	}
