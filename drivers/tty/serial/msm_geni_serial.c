@@ -215,7 +215,6 @@ struct msm_geni_serial_port {
 	bool s_cmd;
 	struct completion m_cmd_timeout;
 	struct completion s_cmd_timeout;
-	struct mutex ioctl_mutex;
 };
 
 static const struct uart_ops msm_geni_serial_pops;
@@ -596,30 +595,27 @@ static int msm_geni_serial_ioctl(struct uart_port *uport, unsigned int cmd,
 						unsigned long arg)
 {
 	struct msm_geni_serial_port *port = GET_DEV_PORT(uport);
-	int ret;
-
-	mutex_lock(&port->ioctl_mutex);
+	int ret = -ENOIOCTLCMD;
 
 	if (port->pm_auto_suspend_disable)
 		return ret;
 
 	switch (cmd) {
-	case TIOCPMGET:
+	case TIOCPMGET: {
 		ret = vote_clock_on(uport);
 		break;
-	case TIOCPMPUT:
+	}
+	case TIOCPMPUT: {
 		ret = vote_clock_off(uport);
 		break;
-	case TIOCPMACT:
+	}
+	case TIOCPMACT: {
 		ret = !pm_runtime_status_suspended(uport->dev);
 		break;
+	}
 	default:
-		ret = -ENOIOCTLCMD;
 		break;
 	}
-
-	mutex_unlock(&port->ioctl_mutex);
-
 	return ret;
 }
 
@@ -3719,7 +3715,6 @@ static int __init msm_geni_serial_init(void)
 		msm_geni_serial_ports[i].uport.ops = &msm_geni_serial_pops;
 		msm_geni_serial_ports[i].uport.flags = UPF_BOOT_AUTOCONF;
 		msm_geni_serial_ports[i].uport.line = i;
-		mutex_init(&msm_geni_serial_ports[i].ioctl_mutex);
 	}
 
 	for (i = 0; i < GENI_UART_CONS_PORTS; i++) {
@@ -3727,7 +3722,6 @@ static int __init msm_geni_serial_init(void)
 		msm_geni_console_port.uport.ops = &msm_geni_console_pops;
 		msm_geni_console_port.uport.flags = UPF_BOOT_AUTOCONF;
 		msm_geni_console_port.uport.line = i;
-		mutex_init(&msm_geni_console_port.ioctl_mutex);
 	}
 
 	ret = console_register(&msm_geni_console_driver);
