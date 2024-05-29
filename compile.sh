@@ -17,6 +17,11 @@ KERNEL_DTB="$KERNEL_DIR/out/arch/arm64/boot/dtb.img"
 AK3_DIR="$KERNEL_DIR/AK3"
 DEVICE="vayu"
 
+# Toolchain
+CLANG="/workspace/ehhe/clang"
+ARCH64="/workspace/ehhe/arch64"
+ARM="/workspace/ehhe/arm"
+
 curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s main
 
     export KBUILD_BUILD_USER="NekoTuru"
@@ -24,8 +29,7 @@ curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh
 
     export ARCH=arm64
     export SUBARCH=arm64
-
-    export PATH="/workspace/ehhe/clang/bin:/workspace/ehhe/arch64:/workspace/ehhe/arm:$PATH"
+    export PATH="$CLANG/bin:$ARCH64:$ARM:$PATH"
 
     make -j$(nproc --all) O=out ARCH=arm64 vayu_defconfig
     make -j$(nproc --all) O=out \
