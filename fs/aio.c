@@ -573,7 +573,7 @@ void kiocb_set_cancel_fn(struct kiocb *iocb, kiocb_cancel_fn *cancel)
 	if (!(iocb->ki_flags & IOCB_AIO_RW))
 		return;
 
-	req = container_of(iocb, struct aio_kiocb, common);
+	req = container_of(iocb, struct aio_kiocb, rw);
 	ctx = req->ki_ctx;
 
 	spin_lock_irqsave(&ctx->ctx_lock, flags);
