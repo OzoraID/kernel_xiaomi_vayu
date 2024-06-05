@@ -1,7 +1,6 @@
 #!/bin/bash
 # Thanks to https://t.me/itsclhex for build script and source
 sudo apt update && sudo -H apt-get install bc python2 ccache binutils-aarch64-linux-gnu cpio
-curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s v0.9.5
 
 kernel_dir="${PWD}"
 CCACHE=$(command -v ccache)
@@ -25,7 +24,7 @@ make_defconfig()
 compile()
 {
     cd ${kernel_dir}
-    echo -"######### Compiling kernel #########"
+    echo "    ######### Compiling kernel #########     "
     make -j$(nproc --all) \
     O=out \
     ARCH=arm64                              \
@@ -59,14 +58,12 @@ completion()
     COMPILED_DTB=arch/arm64/boot/dtb.img
     if [[ -f ${COMPILED_IMAGE} && ${COMPILED_DTBO} && ${COMPILED_DTBO} ]]; then
         echo "############################################"
-        echo "############# OkThisIsEpic!  ###############"
+        echo "######## Anjay Santay Dulu Ga sih!  ########"
         echo "############################################"
-        exit 0
     else
         echo "############################################"
-        echo "##         This Is Not Epic :'(           ##"
+        echo "##         Yah Rungkad Slurr!!!           ##"
         echo "############################################"
-        exit 1
     fi
 }
 make_defconfig
