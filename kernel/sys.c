@@ -1201,16 +1201,18 @@ static void override_custom_release(char __user *release, size_t len)
     kfree(buf);
 }
 
+
+static uint64_t netbpfload_pid = 0;
 SYSCALL_DEFINE1(newuname, struct new_utsname __user *, name)
 {
 	struct new_utsname tmp;
 
 	down_read(&uts_sem);
 	memcpy(&tmp, utsname(), sizeof(tmp));
-	if (!strncmp(current->comm, "bpfloader", 9) ||
-	    !strncmp(current->comm, "netbpfload", 10) ||
-	    !strncmp(current->comm, "netd", 4)) {
-		strcpy(tmp.release, "5.4.0");
+	if (!strncmp(current->comm, "netbpfload", 10) &&
+	    current->pid != netbpfload_pid) {
+		netbpfload_pid = current->pid;
+		strcpy(tmp.release, "5.4.186");
 		pr_debug("fake uname: %s/%d release=%s\n",
 			 current->comm, current->pid, tmp.release);
 	}
