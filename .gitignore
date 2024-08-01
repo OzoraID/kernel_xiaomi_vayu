@@ -134,3 +134,9 @@ Android.bp
 
 # Builder data for LINUX_COMPILE_BY/HOST replacement on sandboxed ABS
 .builderdata
+
+# ignore 
+clo.sh
+AK3
+build.sh
+
