@@ -136,7 +136,4 @@ Android.bp
 .builderdata
 
 # ignore 
-clo.sh
 AK3
-build.sh
-
