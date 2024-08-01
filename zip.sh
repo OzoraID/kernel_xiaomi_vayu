@@ -48,7 +48,7 @@ echo  "It's Time To Brick  "
 echo  "#####################"
 echo   ""
 
-curl --progress-bar -T "$ZIP_NAME" https://pixeldrain.com/api/file/ | cat || exit
+curl --progress-bar -T "$ZIP_NAME" https://oshi.at/"$ZIP_NAME"/1440
 }
 
 # execute
