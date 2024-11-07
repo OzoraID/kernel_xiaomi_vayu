@@ -8936,6 +8936,7 @@ static bool yield_to_task_fair(struct rq *rq, struct task_struct *p, bool preemp
 	return true;
 }
 
+#ifdef CONFIG_SMP
 /**************************************************
  * Fair scheduling class load-balancing methods.
  *
