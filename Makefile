@@ -2,7 +2,7 @@
 VERSION = 4
 PATCHLEVEL = 14
 SUBLEVEL = 348
-EXTRAVERSION = -openela
+EXTRAVERSION =
 NAME = Petit Gorille
 
 # *DOCUMENTATION*
@@ -710,8 +710,7 @@ LLVM_AR		:= llvm-ar
 LLVM_NM		:= llvm-nm
 export LLVM_AR LLVM_NM
 # Set O3 optimization level for LTO
-LDFLAGS		+= --plugin-opt=O3
-LDFLAGS		+= --plugin-opt=O3
+LDFLAGS		+= -O3
 LDFLAGS		+= --lto-O3
 LDFLAGS		+= --plugin-opt=-import-instr-limit=40
 endif
@@ -741,7 +740,6 @@ ifeq ($(cc-name),gcc)
 KBUILD_CFLAGS	+= -mcpu=cortex-a76.cortex-a55+crypto -mtune=cortex-a76.cortex-a55
 endif
 ifeq ($(cc-name),clang)
-KBUILD_CFLAGS   += -O3
 #Enable fast FMA optimizations
 KBUILD_CFLAGS   += -ffp-contract=fast
 #Enable MLGO for register allocation.
@@ -762,15 +760,6 @@ KBUILD_CFLAGS	+= -mllvm -polly \
 ifdef CONFIG_LD_DEAD_CODE_DATA_ELIMINATION
 KBUILD_CFLAGS	+= -mllvm -polly-run-dce
 endif
-OPT_FLAGS	+= $(POLLY_FLAGS)
-KBUILD_LDFLAGS	+= $(POLLY_FLAGS)
-endif
-KBUILD_CFLAGS	+= $(OPT_FLAGS)
-KBUILD_AFLAGS   += $(OPT_FLAGS)
-ifdef CONFIG_LTO_CLANG
-KBUILD_LDFLAGS += --plugin-opt=O3 --strip-debug -march=armv8.2-a+dotprod -mcpu=cortex-a55+crypto+crc
-else
-KBUILD_LDFLAGS += $(OPT_FLAGS)
 endif
 endif
 endif
@@ -948,9 +937,6 @@ lto-clang-flags	:= -flto
 endif
 lto-clang-flags += -fvisibility=default $(call cc-option, -fsplit-lto-unit)
 
-lto-clang-flags += -fwhole-program-vtables
-lto-clang-flags += -fsplit-machine-functions
-
 KBUILD_LDFLAGS_MODULE += -T scripts/module-lto.lds
 
 # allow disabling only clang LTO where needed
@@ -1103,7 +1089,7 @@ export KBUILD_IMAGE ?= vmlinux
 #
 # INSTALL_PATH specifies where to place the updated kernel and system map
 # images. Default is /boot, but you can set it to other values
-export	INSTALL_PATH ?= /boot
+ export	INSTALL_PATH ?= /boot
 
 #
 # INSTALL_DTBS_PATH specifies a prefix for relocations required by build roots.
@@ -2021,3 +2007,5 @@ FORCE:
 # Declare the contents of the .PHONY variable as phony.  We keep that
 # information in a variable so we can use it in if_changed and friends.
 .PHONY: $(PHONY)
+
+KBUILD_CFLAGS += -w
