@@ -42,6 +42,19 @@ const char *prio_to_string(enum kgsl_priority prio)
 		return "<invalid priority>";
 }
 
+static const char *priorities[KGSL_EVENT_NUM_PRIORITIES] = {
+	"KGSL_EVENT_REGULAR_PRIORITY",
+	"KGSL_EVENT_LOW_PRIORITY"
+};
+
+const char *prio_to_string(enum kgsl_priority prio)
+{
+	if (prio < KGSL_EVENT_NUM_PRIORITIES)
+		return priorities[prio];
+	else
+		return "<invalid priority>";
+}
+
 /**
  * _kgsl_event_worker() - Work handler for processing GPU event callbacks
  * @work: Pointer to the kthread_work for the event
@@ -345,6 +358,30 @@ EXPORT_SYMBOL(kgsl_add_low_prio_event);
 
 static DEFINE_RWLOCK(group_lock);
 static LIST_HEAD(group_list);
+
+/**
+ * kgsl_add_event() - Add a new GPU event to a group
+ * @device: Pointer to a KGSL device
+ * @group: Pointer to the group to add the event to
+ * @timestamp: Timestamp that the event will expire on
+ * @func: Callback function for the event
+ * @priv: Private data to send to the callback function
+ */
+int kgsl_add_event(struct kgsl_device *device, struct kgsl_event_group *group,
+		unsigned int timestamp, kgsl_event_func func, void *priv)
+{
+	return kgsl_add_event_common(device, group, timestamp, func, priv,
+		KGSL_EVENT_REGULAR_PRIORITY);
+}
+
+int kgsl_add_low_prio_event(
+		struct kgsl_device *device, struct kgsl_event_group *group,
+		unsigned int timestamp, kgsl_event_func func, void *priv)
+{
+	return kgsl_add_event_common(device, group, timestamp, func, priv,
+		KGSL_EVENT_LOW_PRIORITY);
+}
+EXPORT_SYMBOL(kgsl_add_low_prio_event);
 
 void kgsl_process_event_groups(struct kgsl_device *device)
 {
