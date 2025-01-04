@@ -308,8 +308,10 @@ static int teo_find_shallower_state(struct cpuidle_driver *drv,
  * teo_select - Selects the next idle state to enter.
  * @drv: cpuidle driver containing state data.
  * @dev: Target CPU.
+ * @stop_tick: Indication on whether or not to stop the scheduler tick.
  */
-static int teo_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
+static int teo_select(struct cpuidle_driver *drv, struct cpuidle_device *dev,
+		      bool *stop_tick)
 {
 	struct teo_cpu *cpu_data = per_cpu_ptr(&teo_cpus, dev->cpu);
 	s64 latency_req = cpuidle_governor_latency_req(dev->cpu);
@@ -475,8 +477,10 @@ static int teo_select(struct cpuidle_driver *drv, struct cpuidle_device *dev)
 	 * Skip the timers check if state 0 is the current candidate one,
 	 * because an immediate non-timer wakeup is expected in that case.
 	 */
-	if (!idx)
-		goto out_tick;
+	if (((drv->states[idx].flags & CPUIDLE_FLAG_POLLING) ||
+	    duration_us < TICK_USEC) && !tick_nohz_tick_stopped()) {
+		unsigned int delta_tick_us = ktime_to_us(delta_tick);
+		*stop_tick = false;
 
 	/*
 	 * If state 0 is a polling one, check if the target residency of
