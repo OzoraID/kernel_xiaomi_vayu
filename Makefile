@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0
 VERSION = 4
 PATCHLEVEL = 14
-SUBLEVEL = 348
-EXTRAVERSION =
+SUBLEVEL = 349
+EXTRAVERSION = -openela
 NAME = Petit Gorille
 
 # *DOCUMENTATION*
@@ -710,7 +710,6 @@ LLVM_AR		:= llvm-ar
 LLVM_NM		:= llvm-nm
 export LLVM_AR LLVM_NM
 # Set O3 optimization level for LTO
-LDFLAGS		+= -O3
 LDFLAGS		+= --lto-O3
 LDFLAGS		+= --plugin-opt=-import-instr-limit=40
 endif
