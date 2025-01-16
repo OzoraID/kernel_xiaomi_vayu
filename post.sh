@@ -3,7 +3,7 @@
 KERNEL_NAME="Kurumi Kernel"
 NAME_KERNEL="Kurumi+"
 BASE="NonRebase×Walt"
-ANDROID="a11-15(before qpr1)"
+ANDROID="a11-13-15(after qpr1)"
 KERNEL_DIR="$PWD"
 KERNEL_IMG="$KERNEL_DIR/out/arch/arm64/boot/Image"
 KERNEL_DTBO="$KERNEL_DIR/out/arch/arm64/boot/dtbo.img"
@@ -55,7 +55,7 @@ sendInfo "<b>------ ${KERNEL_NAME} ------</b>" \
   "<b>Name:</b> <code>${NAME_KERNEL}</code>" \
   "<b>Base:</b> <code>${BASE}</code>" \
   "<b>Version:</b> <code>${ANDROID}</code>" \
-  "<b>Commit:</b> <code>$(git log --pretty=format:'%h : %s' -2)</code>" \
+  "<b>Commit:</b> <code>$(git log --pretty=format:'%h : %s' -1)</code>" \
   "<b>Compiler:</b> <code>${KBUILD_COMPILER_STRING}</code>"
 push() {
     # Cek apakah file ZIP ada
